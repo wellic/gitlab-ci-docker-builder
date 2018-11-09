@@ -1,9 +1,15 @@
-FROM docker:18.06
+FROM docker:18.09
 
-ENV PATH "/app/bin:${PATH}"
+RUN apk add --no-cache \
+    bash \
+    curl \
+    jq \
+    python \
+    py-pip \
+ && pip install -U pip \
+ && pip install awscli
 
-RUN apk add --no-cache bash curl jq python py-pip && pip install -U pip && pip install awscli
-
-COPY ./app /app
+#ENV PATH "/app/bin:${PATH}"
+#COPY ./app /app
 
 CMD ["bash"]
