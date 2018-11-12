@@ -24,6 +24,7 @@ if [ "$generate" = '1' ]; then
     cmd="bumpversion --allow-dirty --tag --commit $part"
     echo "$cmd"
     eval "$cmd"
+    ./build_git_tags.sh
 else
     cat > "${CHANGELOG_NEW}" <<GENERATE_TEMPLATE_CHANGELOG_NEW
 # ${CHANGELOG_NAME}
