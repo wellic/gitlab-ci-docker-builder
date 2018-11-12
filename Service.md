@@ -1,4 +1,4 @@
 ---
 # Service *`gitlab-ci-docker-builder`*
 
-## Version: *v0.0.1*
+## Version: *v0.0.2*
