@@ -1,0 +1,23 @@
+#!/usr/bin/env bash
+
+set -u
+
+if [[ "${DOCKER_DEBUG_MODE:-}" = '1' ]]; then
+    set -x
+fi
+
+SCRIPT_DIR=$(dirname "$0")
+
+source "${SCRIPT_DIR}/_vars"
+source "${SCRIPT_DIR}/_functions"
+
+_init_DEV_VARS
+
+_login_to_aws_ecr
+_create_aws_repo
+_create_aws_images
+_logout_from_aws_ecr
+
+#if [[ "${DOCKER_DEBUG_MODE}" = '1' ]]; then
+#    env | sort
+#fi

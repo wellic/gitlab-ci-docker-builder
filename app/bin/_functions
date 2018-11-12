@@ -1,0 +1,191 @@
+_print_msg_and_exit() {
+    local msg=${1:-}
+    local exit_code=${2:-1}
+    [[ "$msg" = '' ]] || echo -e "$msg"
+    if [[ "$exit_code" != '' ]]
+    then
+        exit ${exit_code}
+    fi
+    return 0
+}
+
+_load_and_export_auth_var() {
+#    set -x
+    local var_name=$1
+    if [[ "${!var_name}" = '' ]]; then
+        local var_path=$2
+        local var_key=$3
+        [[ "$W_API_PATH_AUTH" = '' ]] && _print_msg_and_exit "Error!!! Check var: W_API_PATH_AUTH"
+        [[ "$W_CMD_TOKEN"        = '' ]] && _print_msg_and_exit "Error!!! Check var: W_CMD_TOKEN"
+        local cmd="$W_CMD_TOKEN '${W_API_PATH_AUTH}${var_path}'"
+        [[ "$DOCKER_DEBUG_MODE" = '1' ]] && echo "$cmd"
+        local result=$(eval "${cmd}" | jq -r "$var_key")
+        printf -v ${var_name} "$result"
+        export ${var_name}
+        [[ "$DOCKER_DEBUG_MODE" = '1' ]] && echo "$var_name=${!var_name}"
+    fi
+    [[ ("${!var_name}" = '') || ("${!var_name}" = 'null') ]] && _print_msg_and_exit "Error!!! Check var: ${var_name}"
+}
+
+_load_and_export_project_var() {
+#    set -x
+    local var_name=$1
+    if [[ "${!var_name}" = '' ]]; then
+        local var_path=$2
+        local var_key=$3
+        [[ "$W_API_PATH_PROJECT" = '' ]] && _print_msg_and_exit "Error!!! Check var: W_API_PATH_PROJECT"
+        [[ "$W_CMD_TOKEN"        = '' ]] && _print_msg_and_exit "Error!!! Check var: W_CMD_TOKEN"
+        local cmd="$W_CMD_TOKEN '${W_API_PATH_PROJECT}${var_path}'"
+        [[ "$DOCKER_DEBUG_MODE" = '1' ]] && echo "$cmd"
+        result=$(eval "${cmd}" | jq -r "$var_key")
+        printf -v ${var_name} "$result"
+        export ${var_name}
+        [[ "$DOCKER_DEBUG_MODE" = '1' ]] && echo "$var_name=${!var_name}"
+    fi
+    [[ ("${!var_name}" = '') || ("${!var_name}" = 'null') ]] && _print_msg_and_exit "Error!!! Check var: ${var_name}"
+}
+
+_init_W_VARS() {
+    [[ "${GITLAB_PRIVATE_TOKEN}" != '' ]] || _print_msg_and_exit "Error!!! Check var: GITLAB_PRIVATE_TOKEN"
+    export W_CMD_TOKEN="curl -s --header 'PRIVATE-TOKEN: ${GITLAB_PRIVATE_TOKEN}'"
+
+    [[ "${GITLAB_API_PATH}"      != '' ]] || _print_msg_and_exit "Error!!! Check var: GITLAB_API_PATH"
+    [[ "${CI_PROJECT_ID}"        != '' ]] || _print_msg_and_exit "Error!!! Check var: CI_PROJECT_ID"
+    export W_API_PATH_PROJECT="${GITLAB_API_PATH}/${CI_PROJECT_ID}"
+
+    [[ "${AUTH_CI_PROJECT_ID}"   != '' ]] || _print_msg_and_exit "Error!!! Check var: AUTH_CI_PROJECT_ID"
+    export W_API_PATH_AUTH="${GITLAB_API_PATH}/${AUTH_CI_PROJECT_ID}"
+}
+
+_init_DEV_VARS() {
+    if [[  ("$CI_PROJECT_NAME"       = '') \
+        || ("$REGISTRY_URL"          = '') \
+        || ("$AWS_DEFAULT_REGION"    = '') \
+        || ("$AWS_ACCESS_KEY_ID"     = '') \
+        || ("$AWS_SECRET_ACCESS_KEY" = '') \
+    ]]; then
+        _init_W_VARS
+    fi
+
+    local var_name=""
+    local var_path=""
+    local var_key=""
+
+    #CI_PROJECT_NAME
+    var_name="CI_PROJECT_NAME"
+    var_path="/"
+    var_key=".name"
+    _load_and_export_project_var "$var_name" "$var_path" "$var_key"
+
+    #REGISTRY_URL
+    var_name="REGISTRY_URL"
+    var_path="/variables/${var_name}"
+    var_key=".value"
+    _load_and_export_auth_var "$var_name" "$var_path" "$var_key"
+
+    #AWS_DEFAULT_REGION
+    var_name="AWS_DEFAULT_REGION"
+    var_path="/variables/${var_name}"
+    var_key=".value"
+    _load_and_export_auth_var "$var_name" "$var_path" "$var_key"
+
+    #AWS_ACCESS_KEY_ID
+    var_name="AWS_ACCESS_KEY_ID"
+    var_path="/variables/${var_name}"
+    var_key=".value"
+    _load_and_export_auth_var "$var_name" "$var_path" "$var_key"
+
+    #AWS_SECRET_ACCESS_KEY
+    var_name="AWS_SECRET_ACCESS_KEY"
+    var_path="/variables/${var_name}"
+    var_key=".value"
+    _load_and_export_auth_var "$var_name" "$var_path" "$var_key"
+}
+
+_login_to_aws_ecr() {
+    [[ "${AWS_DEFAULT_REGION}" = '' ]] && _print_msg_and_exit "Error!!! Check var: AWS_DEFAULT_REGION"
+    local cmd_aws="aws ecr get-login --no-include-email '--region=$AWS_DEFAULT_REGION'"
+    $(eval "${cmd_aws}") || _print_msg_and_exit "Error!!! Can't login:\n$cmd_aws"
+}
+
+_logout_from_aws_ecr() {
+    [[ "$REGISTRY_URL" = '' ]] && _print_msg_and_exit "Error!!! Check var: REGISTRY_URL"
+    docker logout "$REGISTRY_URL"
+}
+
+_create_aws_repo() {
+    [[ "$CI_PROJECT_NAME" = '' ]] && _print_msg_and_exit "Error!!! Check var: CI_PROJECT_NAME"
+
+    local query="repositories[?repositoryName=='$CI_PROJECT_NAME'].{repositoryName:repositoryName}"
+    REPO_EXISTS=$(aws ecr describe-repositories --query "$query" --output=text)
+    if [[ "$REPO_EXISTS" = '' ]]; then
+        local cmd_aws="aws ecr create-repository --repository-name=${CI_PROJECT_NAME} --output=table"
+        $(eval "${cmd_aws}") || _print_msg_and_exit "Error!!! Can't create repository:\n$cmd_aws" 1
+        REPO_EXISTS=0
+    else
+        echo "Docker registry ${CI_PROJECT_NAME} exists"
+        REPO_EXISTS=1
+    fi
+    export REPO_EXISTS
+}
+
+_create_aws_images() {
+    [[ "$REGISTRY_URL" = '' ]] && _print_msg_and_exit "Error!!! Check var: REGISTRY_URL"
+    [[ "$CI_PROJECT_NAME" = '' ]] && _print_msg_and_exit "Error!!! Check var: CI_PROJECT_NAME"
+    [[ "$DOCKER_TAG_LATEST" = '' ]] && _print_msg_and_exit "Error!!! Check var: DOCKER_TAG_LATEST"
+
+    REGISTRY_IMAGE_NAME=${REGISTRY_URL}/${CI_PROJECT_NAME}
+    IMAGE_TAG_LATEST=${REGISTRY_IMAGE_NAME}:${DOCKER_TAG_LATEST}
+
+    W_APP_DOCKER_SHA_OLD=""
+    if [[ "$REPO_EXISTS" = '1' ]]; then
+        if docker pull "${IMAGE_TAG_LATEST}"; then
+            DOCKER_BUILD_OPT="--cache-from ${IMAGE_TAG_LATEST} ${DOCKER_BUILD_OPT}"
+            W_APP_DOCKER_SHA_OLD=$(docker image inspect "${IMAGE_TAG_LATEST}" -f '{{.Id}}' 2>/dev/null)
+        fi
+    fi
+
+    declare -a IMAGE_TAGS=()
+    #latest
+    IMAGE_TAGS+=("${IMAGE_TAG_LATEST}")
+
+    #sha
+    [[ "$CI_COMMIT_SHA" != '' ]] && IMAGE_TAGS+=("${REGISTRY_IMAGE_NAME}:${CI_COMMIT_SHA}")
+
+    #tag
+    [[ "$CI_COMMIT_TAG" != '' ]] && IMAGE_TAGS+=("${REGISTRY_IMAGE_NAME}:${CI_COMMIT_TAG}")
+
+    #version
+    [[ -e "$APP_VERSION_FILE" ]] && APP_VERSION=$(head -n 1 "$APP_VERSION_FILE") || APP_VERSION=""
+    [[ ("$APP_VERSION" != '') && ("$APP_VERSION" != "$CI_COMMIT_TAG") ]] && IMAGE_TAGS+=("${REGISTRY_IMAGE_NAME}:${APP_VERSION}")
+
+    local tag
+    IMAGE_BUILD_TAGS="";
+    for tag in "${IMAGE_TAGS[@]}"; do
+        [[ "$tag" != '' ]] && IMAGE_BUILD_TAGS="$IMAGE_BUILD_TAGS --tag $tag"
+    done
+    docker build ${DOCKER_BUILD_OPT} ${IMAGE_BUILD_TAGS} .
+
+    W_APP_DOCKER_SHA_NEW=$(docker image inspect ${IMAGE_TAG_LATEST} -f '{{.Id}}' 2>/dev/null)
+    [[ "$DOCKER_DEBUG_MODE" = '1' ]] && echo "OLD SHA: $W_APP_DOCKER_SHA_OLD"
+    [[ "$DOCKER_DEBUG_MODE" = '1' ]] && echo "NEW SHA: $W_APP_DOCKER_SHA_NEW"
+
+    if [[ ("$W_APP_DOCKER_SHA_OLD" != "$W_APP_DOCKER_SHA_NEW") && ("$W_APP_DOCKER_SHA_NEW" != '') ]]; then
+        for tag in "${IMAGE_TAGS[@]}"; do
+            [[ "$DOCKER_DEBUG_MODE" = '1' ]] && echo "Push tag: $tag"
+            local cmd_push="docker push $tag"
+            [[ "$DOCKER_DEBUG_MODE" = '1'   ]] && echo "${cmd_push}"
+            [[ "$DOCKER_EMULATE_MODE" = '1' ]] && eval "${cmd_push}"
+        done
+    else
+        [[ "$DOCKER_DEBUG_MODE" = '1' ]] && echo "Docker image with same SHA already exists."
+        [[ "$DOCKER_DEBUG_MODE" = '1' ]] && echo "New images are not pushed !"
+    fi
+
+    export REGISTRY_IMAGE_NAME
+    export IMAGE_TAG_LATEST
+    export W_APP_DOCKER_SHA_OLD
+    export W_APP_DOCKER_SHA_NEW
+}
+
+
