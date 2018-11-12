@@ -9,7 +9,8 @@ RUN apk add --no-cache \
  && pip install -U pip \
  && pip install awscli
 
-#ENV PATH "/app/bin:${PATH}"
-#COPY ./app /app
+ENV PATH "/app/bin:${PATH}"
+
+COPY ./app /app
 
 CMD ["bash"]
