@@ -47,9 +47,3 @@ git ci -am 'Message'
 ``` {.bash}
 git push origin master:master
 ```
-
-### Update docker tag
-
-``` {.bash}
-./build_git_tags.sh
-```
