@@ -2,7 +2,7 @@
 
 set -u
 
-if [[ "${DOCKER_DEBUG_MODE:-}" = '1' ]]; then
+if [[ "${DOCKER_BUILD_DEBUG_MODE:-}" = '1' ]]; then
     set -x
 fi
 
@@ -18,6 +18,6 @@ _create_aws_repo
 _create_aws_images
 _logout_from_aws_ecr
 
-#if [[ "${DOCKER_DEBUG_MODE}" = '1' ]]; then
+#if [[ "${DOCKER_BUILD_DEBUG_MODE}" = '1' ]]; then
 #    env | sort
 #fi

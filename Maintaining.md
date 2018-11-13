@@ -1,26 +1,16 @@
-------------------------------------------------------------------------
+# Maintaining
 
-Service *`gitlab-ci-docker-builder`*
-====================================
-
-Version: *v0.1.6*
------------------
-
-Maintaining
-===========
-
-Create new version
-------------------
+## Create new version
 
 ### Load last version of master on local PC
 
-``` {.bash}
+```bash
 git checkout master
 ```
 
 ### Change code and commit
 
-``` {.bash}
+```bash
 git status
 git add -A
 git ci -am 'Message'
@@ -28,28 +18,28 @@ git ci -am 'Message'
 
 ### Create skeleton in `rootproject`
 
-``` {.bash}
+```bash
 ./build_version.sh 0
 ```
 
 ### Edit `CHANGELOG.md`
 
--   Add/Edit/Remove `CHANGELOG.md`
+- Add/Edit/Remove `CHANGELOG.md`
 
 ### Create new version, add tag and commit
 
-``` {.bash}
+```bash
 ./build_version.sh 1
 ```
 
 ### Push to repository
 
-``` {.bash}
+```bash
 git push origin master:master
 ```
 
 ### Update docker tag
 
-``` {.bash}
+```bash
 ./build_git_tags.sh
 ```
