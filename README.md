@@ -3,7 +3,7 @@
 Service *`gitlab-ci-docker-builder`*
 ====================================
 
-Version: *v0.1.9*
+Version: *v0.1.10*
 -----------------
 
 Maintaining
