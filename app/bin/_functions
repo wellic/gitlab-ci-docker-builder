@@ -18,11 +18,11 @@ _load_and_export_auth_var() {
         [[ "$W_API_PATH_AUTH" = '' ]] && _print_msg_and_exit "Error!!! Check var: W_API_PATH_AUTH"
         [[ "$W_CMD_TOKEN"        = '' ]] && _print_msg_and_exit "Error!!! Check var: W_CMD_TOKEN"
         local cmd="$W_CMD_TOKEN '${W_API_PATH_AUTH}${var_path}'"
-        [[ "$DOCKER_DEBUG_MODE" = '1' ]] && echo "$cmd"
+        [[ "$DOCKER_BUILD_DEBUG_MODE" = '1' ]] && echo "$cmd"
         local result=$(eval "${cmd}" | jq -r "$var_key")
         printf -v ${var_name} "$result"
         export ${var_name}
-        [[ "$DOCKER_DEBUG_MODE" = '1' ]] && echo "$var_name=${!var_name}"
+        [[ "$DOCKER_BUILD_DEBUG_MODE" = '1' ]] && echo "$var_name=${!var_name}"
     fi
     [[ ("${!var_name}" = '') || ("${!var_name}" = 'null') ]] && _print_msg_and_exit "Error!!! Check var: ${var_name}"
 }
@@ -36,11 +36,11 @@ _load_and_export_project_var() {
         [[ "$W_API_PATH_PROJECT" = '' ]] && _print_msg_and_exit "Error!!! Check var: W_API_PATH_PROJECT"
         [[ "$W_CMD_TOKEN"        = '' ]] && _print_msg_and_exit "Error!!! Check var: W_CMD_TOKEN"
         local cmd="$W_CMD_TOKEN '${W_API_PATH_PROJECT}${var_path}'"
-        [[ "$DOCKER_DEBUG_MODE" = '1' ]] && echo "$cmd"
+        [[ "$DOCKER_BUILD_DEBUG_MODE" = '1' ]] && echo "$cmd"
         result=$(eval "${cmd}" | jq -r "$var_key")
         printf -v ${var_name} "$result"
         export ${var_name}
-        [[ "$DOCKER_DEBUG_MODE" = '1' ]] && echo "$var_name=${!var_name}"
+        [[ "$DOCKER_BUILD_DEBUG_MODE" = '1' ]] && echo "$var_name=${!var_name}"
     fi
     [[ ("${!var_name}" = '') || ("${!var_name}" = 'null') ]] && _print_msg_and_exit "Error!!! Check var: ${var_name}"
 }
@@ -167,19 +167,19 @@ _create_aws_images() {
     docker build ${DOCKER_BUILD_OPT} ${IMAGE_BUILD_TAGS} .
 
     W_APP_DOCKER_SHA_NEW=$(docker image inspect ${IMAGE_TAG_LATEST} -f '{{.Id}}' 2>/dev/null)
-    [[ "$DOCKER_DEBUG_MODE" = '1' ]] && echo "OLD SHA: $W_APP_DOCKER_SHA_OLD"
-    [[ "$DOCKER_DEBUG_MODE" = '1' ]] && echo "NEW SHA: $W_APP_DOCKER_SHA_NEW"
+    [[ "$DOCKER_BUILD_DEBUG_MODE" = '1' ]] && echo "OLD SHA: $W_APP_DOCKER_SHA_OLD"
+    [[ "$DOCKER_BUILD_DEBUG_MODE" = '1' ]] && echo "NEW SHA: $W_APP_DOCKER_SHA_NEW"
 
     if [[ ("$W_APP_DOCKER_SHA_OLD" != "$W_APP_DOCKER_SHA_NEW") && ("$W_APP_DOCKER_SHA_NEW" != '') ]]; then
         for tag in "${IMAGE_TAGS[@]}"; do
-            [[ "$DOCKER_DEBUG_MODE" = '1' ]] && echo "Push tag: $tag"
+            [[ "$DOCKER_BUILD_DEBUG_MODE" = '1' ]] && echo "Push tag: $tag"
             local cmd_push="docker push $tag"
-            [[ "$DOCKER_DEBUG_MODE" = '1'   ]] && echo "${cmd_push}"
+            [[ "$DOCKER_BUILD_DEBUG_MODE" = '1'   ]] && echo "${cmd_push}"
             [[ "$DOCKER_EMULATE_MODE" = '1' ]] && eval "${cmd_push}"
         done
     else
-        [[ "$DOCKER_DEBUG_MODE" = '1' ]] && echo "Docker image with same SHA already exists."
-        [[ "$DOCKER_DEBUG_MODE" = '1' ]] && echo "New images are not pushed !"
+        [[ "$DOCKER_BUILD_DEBUG_MODE" = '1' ]] && echo "Docker image with same SHA already exists."
+        [[ "$DOCKER_BUILD_DEBUG_MODE" = '1' ]] && echo "New images are not pushed !"
     fi
 
     export REGISTRY_IMAGE_NAME

@@ -2,38 +2,40 @@
 
 ## Create new version
 
-### Load last version of master on local PC
+- Load last version of master on local PC
 
-```bash
-git checkout master
-```
+    ```bash
+    git checkout master
+    ```
 
-### Change code and commit
+- Change code and commit
 
-```bash
-git status
-git add -A
-git ci -am 'Message'
-```
+    ```bash
+    git status
+    git add -A
+    git ci -am 'Message'
+    ```
 
-### Create skeleton in `rootproject`
+- Create skeleton in `rootproject`
 
-```bash
-./build_version.sh 0
-```
+    ```bash
+    ./build_version.sh 0
+    ```
 
-### Edit `CHANGELOG.md`
+- Edit `CHANGELOG.md`
 
-- Add/Edit/Remove `CHANGELOG.md`
+    ```bash
+    vi CHANGELOG.md
+    ```
 
-### Create new version, add tag and commit
+- Create new version, add tag and commit
 
-```bash
-./build_version.sh 1
-```
+    ```bash
+    ./build_version.sh 1
+    ```
 
-### Push to repository
+- Push to repository
 
-```bash
-git push origin master:master
-```
+    ```bash
+    git push origin master
+    ```
