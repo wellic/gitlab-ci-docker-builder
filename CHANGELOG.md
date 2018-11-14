@@ -1,5 +1,11 @@
 # CHANGELOG
 
+## v0.1.15 (2018-11-14)
+
+### New
+
+- Added $DOCKER_BUILD_USE_CACHE_MODE
+
 ## v0.1.14 (2018-11-14)
 
 ### New

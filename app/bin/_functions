@@ -139,9 +139,11 @@ _create_aws_images() {
 
     W_APP_DOCKER_SHA_OLD=""
     if [[ "$REPO_EXISTS" = '1' ]]; then
-        if docker pull "${IMAGE_TAG_LATEST}"; then
-            DOCKER_BUILD_OPT="--cache-from ${IMAGE_TAG_LATEST} ${DOCKER_BUILD_OPT}"
-            W_APP_DOCKER_SHA_OLD=$(docker image inspect "${IMAGE_TAG_LATEST}" -f '{{.Id}}' 2>/dev/null)
+        if [[ "$DOCKER_BUILD_USE_CACHE_MODE" = '1' ]]; then
+            if docker pull "${IMAGE_TAG_LATEST}"; then
+                DOCKER_BUILD_OPT="--cache-from ${IMAGE_TAG_LATEST} ${DOCKER_BUILD_OPT}"
+                W_APP_DOCKER_SHA_OLD=$(docker image inspect "${IMAGE_TAG_LATEST}" -f '{{.Id}}' 2>/dev/null)
+            fi
         fi
     fi
 
