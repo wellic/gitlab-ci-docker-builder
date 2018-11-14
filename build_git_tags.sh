@@ -10,8 +10,8 @@ git tag -am "$VERSION_GIT_TAG" "$VERSION_GIT_TAG"
 
 cat <<HELP
 
-git push --delete origin "$VERSION_GIT_TAG"; \
-git push --tags origin;\
+git push --delete origin "$VERSION_GIT_TAG"
+git push --tags origin
 git push origin
 
 HELP
