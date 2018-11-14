@@ -1,5 +1,11 @@
 # CHANGELOG
 
+## v0.1.16 (2018-11-14)
+
+### Change
+
+- Fixed creating repo
+
 ## v0.1.15 (2018-11-14)
 
 ### New

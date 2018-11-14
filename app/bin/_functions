@@ -120,7 +120,7 @@ _create_aws_repo() {
     REPO_EXISTS=$(aws ecr describe-repositories --query "$query" --output=text)
     if [[ "$REPO_EXISTS" = '' ]]; then
         local cmd_aws="aws ecr create-repository --repository-name=${CI_PROJECT_NAME} --output=table"
-        $(eval "${cmd_aws}") || _print_msg_and_exit "Error!!! Can't create repository:\n$cmd_aws" 1
+        eval "${cmd_aws}" || _print_msg_and_exit "Error!!! Can't create repository:\n$cmd_aws"
         REPO_EXISTS=0
     else
         echo "Docker registry ${CI_PROJECT_NAME} exists"
