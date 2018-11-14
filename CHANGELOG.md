@@ -1,5 +1,11 @@
 # CHANGELOG
 
+## v0.1.12 (2018-11-14)
+
+### New
+
+- Added $DOCKER_BUILD_EMULATE_MODE
+
 ## v0.1.11 (2018-11-14)
 
 ### Change
@@ -11,4 +17,3 @@
 
 ### New
 
-- Added Maintaining.md

@@ -174,8 +174,8 @@ _create_aws_images() {
         for tag in "${IMAGE_TAGS[@]}"; do
             [[ "$DOCKER_BUILD_DEBUG_MODE" = '1' ]] && echo "Push tag: $tag"
             local cmd_push="docker push $tag"
-            [[ "$DOCKER_BUILD_DEBUG_MODE" = '1'   ]] && echo "${cmd_push}"
-            [[ "$DOCKER_BUILD_EMULATE_MODE" = '1' ]] && eval "${cmd_push}"
+            [[ "$DOCKER_BUILD_DEBUG_MODE" = '1'    ]] && echo "${cmd_push}"
+            [[ "$DOCKER_BUILD_EMULATE_MODE" != '1' ]] && eval "${cmd_push}"
         done
     else
         [[ "$DOCKER_BUILD_DEBUG_MODE" = '1' ]] && echo "Docker image with same SHA already exists."
