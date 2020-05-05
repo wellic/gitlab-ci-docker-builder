@@ -1,5 +1,41 @@
 # CHANGELOG
 
+## v1.0.0 (2020-05-05)
+
+### New
+
+### Change
+
+### Delete
+
+---
+
+# CHANGELOG
+
+## v0.1.0 (2020-05-05)
+
+### New
+
+### Change
+
+### Delete
+
+---
+
+# CHANGELOG
+
+## v0.0.7 (2020-05-05)
+
+### New
+
+### Change
+
+### Delete
+
+---
+
+# CHANGELOG
+
 ## v0.0.6 (2018-12-12)
 
 ### New
