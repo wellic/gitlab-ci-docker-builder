@@ -8,7 +8,7 @@ report](https://gitlab.cpcs.ws/cpcs/devops/docker-images/gitlab-ci-docker-builde
 Service *`gitlab-ci-docker-builder`*
 ====================================
 
-Version: *v0.0.6*
+Version: *v1.0.0*
 -----------------
 
 Maintaining
