@@ -1,31 +1,32 @@
 # CHANGELOG
 
-## v0.1.18 (2018-11-14)
+## v0.0.6 (2018-12-12)
+
+### New
+
+- Added login_aws_ecr
+
+## v0.0.5 (2018-11-30)
 
 ### Change
 
-- Fixed creating repo
+- Improved CI/CD
 
-## v0.1.15 (2018-11-14)
-
-### New
-
-- Added $DOCKER_BUILD_USE_CACHE_MODE
-
-## v0.1.14 (2018-11-14)
-
-### New
-
-- Added $DOCKER_BUILD_EMULATE_MODE
-
-## v0.1.11 (2018-11-14)
+## v0.0.3 (2018-11-30)
 
 ### Change
 
-- Updated Maintaining.md
-- Ipmproved build_version.sh
+- Set latest version to 18.06
 
-## v0.1.7 (2018-11-13)
+## v0.0.2 (2018-11-30)
 
 ### New
+
+- Initial versions 18.09
+
+# CHANGELOG
+
+## v0.0.1 (2018-11-30)
+
+- Initial versions 18.06
 

@@ -18,7 +18,7 @@ PANDOC_OPT=$@
 
 FILES=
 for f in $(cat "$MASTER_DOC"); do
-    [ "$f" = '' ] && continue
+    echo "$f" | grep -qE '^\s*(#|$)' && continue
     FILES+=" '$f'"
 done
 CMD="pandoc $PANDOC_OPT --to=$OUTPUT_FORMAT -o '$OUTPUT_DOC' $FILES"

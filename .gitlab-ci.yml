@@ -1,0 +1,51 @@
+image: docker:latest
+services:
+  - docker:dind
+
+stages:
+  - build
+  - test
+  - release
+
+variables:
+  CI_DEBUG_TRACE: "false"
+  REGISTRY_IMAGES_SERVER: gitlab.cpcs.ws:4567
+  IMAGE_NAME: gitlab.cpcs.ws:4567/cpcs/devops/docker-images/gitlab-ci-docker-builder
+  TEST_IMAGE: $IMAGE_NAME:$CI_COMMIT_REF_NAME
+  RELEASE_IMAGE: $IMAGE_NAME:latest
+  TEST_DIR: /app
+
+before_script:
+  - echo "$CI_JOB_TOKEN" | docker login -u gitlab-ci-token --password-stdin $REGISTRY_IMAGES_SERVER
+
+after_script:
+  - docker logout $REGISTRY_IMAGES_SERVER
+
+build:
+  stage: build
+  script:
+    - docker build --pull -t $TEST_IMAGE -f 'docker/Dockerfile' .
+    - docker push $TEST_IMAGE
+  only:
+    - master
+
+test:
+  stage: test
+  script:
+    - docker pull $TEST_IMAGE
+    - docker run $TEST_IMAGE ls $TEST_DIR
+    - echo "Docker image tested -> 100%"
+  only:
+    - master
+
+release:
+  stage: release
+  script:
+    - docker pull $TEST_IMAGE
+    - docker tag $TEST_IMAGE $RELEASE_IMAGE
+    - docker push $RELEASE_IMAGE
+    - IMAGE_APP_VERSION=$IMAGE_NAME:$(head -1 app-version.txt)
+    - docker tag $TEST_IMAGE $IMAGE_APP_VERSION
+    - docker push $IMAGE_APP_VERSION
+  only:
+    - master

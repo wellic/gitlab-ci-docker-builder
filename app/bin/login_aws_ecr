@@ -1,0 +1,16 @@
+#!/usr/bin/env bash
+
+set -u
+
+if [[ "${DOCKER_BUILD_DEBUG_MODE:-}" = '1' ]]; then
+    set -x
+fi
+
+SCRIPT_DIR=$(dirname "$0")
+
+source "${SCRIPT_DIR}/_vars"
+source "${SCRIPT_DIR}/_functions"
+
+_init_DEV_VARS
+
+_login_to_aws_ecr

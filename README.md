@@ -1,10 +1,15 @@
+[![pipeline
+status](https://gitlab.cpcs.ws/cpcs/devops/docker-images/gitlab-ci-docker-builder/badges/master/pipeline.svg)](https://gitlab.cpcs.ws/cpcs/devops/docker-images/gitlab-ci-docker-builder/commits/master)
+[![coverage
+report](https://gitlab.cpcs.ws/cpcs/devops/docker-images/gitlab-ci-docker-builder/badges/master/coverage.svg)](https://gitlab.cpcs.ws/cpcs/devops/docker-images/gitlab-ci-docker-builder/commits/master)
+
 ------------------------------------------------------------------------
 
 Service *`gitlab-ci-docker-builder`*
 ====================================
 
-Version: *v0.1.18*
-------------------
+Version: *v0.0.6*
+-----------------
 
 Maintaining
 ===========
